@@ -7,7 +7,6 @@ import time
 import os
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from flask import Flask
 @app_commands.command(name="hesap_sil", description="Belirtilen platform ve türdeki hesapları siler (Yönetici sadece).")
 @app_commands.describe(platform="Silinecek hesapların platformu", type="Hesap türü (free/premium)")
 async def hesap_sil(interaction: discord.Interaction, platform: str, type: str):
