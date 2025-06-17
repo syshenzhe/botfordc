@@ -7,6 +7,33 @@ import time
 import os
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from flask import Flask
+@app_commands.command(name="hesap_sil", description="Belirtilen platform ve türdeki hesapları siler (Yönetici sadece).")
+@app_commands.describe(platform="Silinecek hesapların platformu", type="Hesap türü (free/premium)")
+async def hesap_sil(interaction: discord.Interaction, platform: str, type: str):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("Bu komutu sadece yöneticiler kullanabilir.", ephemeral=True)
+        return
+
+    try:
+        with open("accounts.txt", "r", encoding="utf-8") as f:
+            accounts = f.readlines()
+
+        kalan_hesaplar = [acc for acc in accounts if not (acc.strip().split(',')[1] == platform and acc.strip().split(',')[2] == type)]
+
+        silinen_sayisi = len(accounts) - len(kalan_hesaplar)
+
+        if silinen_sayisi == 0:
+            await interaction.response.send_message(f"{platform} platformunda {type} türünde hesap bulunamadı.", ephemeral=True)
+            return
+
+        with open("accounts.txt", "w", encoding="utf-8") as f:
+            f.writelines(kalan_hesaplar)
+
+        await interaction.response.send_message(f"{silinen_sayisi} adet hesap silindi.", ephemeral=True)
+
+    except FileNotFoundError:
+        await interaction.response.send_message("Stok dosyası bulunamadı.", ephemeral=True)
 
 # 🌐 Keep-alive servisi (render.com için)
 class KeepAliveHandler(BaseHTTPRequestHandler):
