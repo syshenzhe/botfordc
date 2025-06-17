@@ -5,6 +5,20 @@ import random
 import asyncio
 import time
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class KeepAliveHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'Bot calisiyor')
+
+def run_keep_alive():
+    server = HTTPServer(('0.0.0.0', 8080), KeepAliveHandler)
+    server.serve_forever()
+
+threading.Thread(target=run_keep_alive).start()
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -12,9 +26,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     if not hasattr(bot, 'synced'):
-        await bot.tree.sync()
         bot.synced = True
-    print(f'Logged in as {bot.user.name} - {bot.user.id}')
+        print(f'Logged in as {bot.user.name} - {bot.user.id}')
 
 
 @app_commands.command(name="ping", description="Bot gecikmesi kontrolü")
